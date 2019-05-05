@@ -7,5 +7,18 @@ module Authlogic
     autoload :BCrypt, "authlogic/crypto_providers/bcrypt"
     autoload :AES256, "authlogic/crypto_providers/aes256"
     autoload :SCrypt, "authlogic/crypto_providers/scrypt"
+
+    # Convert a string constant into a class.
+    def self.crypto_provider_from(value)
+      value.is_a?(String) ? value.constantize : value
+    end
+
+    # Convert an array of string constants into an array of classes.
+    def self.crypto_providers_from(value)
+      if value.is_a?(Array)
+        return value.map { |provider| CryptoProviders.crypto_provider_from(provider) }
+      end
+      CryptoProviders.crypto_provider_from(value)
+    end
   end
 end
