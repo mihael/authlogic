@@ -14,7 +14,7 @@ module Authlogic
       # setting, and also set a default value for the setting.
       def rw_config(key, value, default_value = nil)
         if value.nil?
-          acts_as_authentic_config.include?(key) ? acts_as_authentic_config[key] : default_value
+          acts_as_authentic_config.include?(key) ? acts_as_authentic_config[key] : default_value.call
         else
           self.acts_as_authentic_config = acts_as_authentic_config.merge(key => value)
           value
