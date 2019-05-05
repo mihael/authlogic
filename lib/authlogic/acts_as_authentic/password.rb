@@ -420,7 +420,7 @@ module Authlogic
             end
 
             def crypto_provider_from_string(value)
-              value.kind_of?(String) ? value.constantize : value
+              value.is_a?(String) ? value.constantize : value
             end
         end
       end
