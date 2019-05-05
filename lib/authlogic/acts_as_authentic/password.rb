@@ -181,7 +181,7 @@ module Authlogic
         # * <tt>Default:</tt> CryptoProviders::SCrypt
         # * <tt>Accepts:</tt> Class
         def crypto_provider(value = nil)
-          rw_config(:crypto_provider, value, "Authlogic::CryptoProviders::SCrypt")
+          CryptoProviders.crypto_provider_from(rw_config(:crypto_provider, value, "Authlogic::CryptoProviders::SCrypt"))
         end
         alias_method :crypto_provider=, :crypto_provider
 
@@ -200,7 +200,9 @@ module Authlogic
         # * <tt>Default:</tt> nil
         # * <tt>Accepts:</tt> Class or Array
         def transition_from_crypto_providers(value = nil)
-          rw_config(:transition_from_crypto_providers, (!value.nil? && [value].flatten.compact) || value, [])
+          CryptoProviders.crypto_providers_from(
+            rw_config(:transition_from_crypto_providers, (!value.nil? && [value].flatten.compact) || value, [])
+          )
         end
         alias_method :transition_from_crypto_providers=, :transition_from_crypto_providers
       end
@@ -412,15 +414,11 @@ module Authlogic
             end
 
             def crypto_provider
-              crypto_provider_from_string(self.class.crypto_provider)
+              CryptoProviders.crypto_provider_from(self.class.crypto_provider)
             end
 
             def transition_from_crypto_providers
-              crypto_provider_from_string(self.class.transition_from_crypto_providers)
-            end
-
-            def crypto_provider_from_string(value)
-              value.is_a?(String) ? value.constantize : value
+              CryptoProviders.crypto_providers_from(self.class.transition_from_crypto_providers)
             end
         end
       end
