@@ -104,26 +104,6 @@ module ActsAsAuthenticTest
       assert_equal [], User.transition_from_crypto_providers
     end
 
-    def test_crypto_provider_config_with_string
-      assert_equal Authlogic::CryptoProviders::SCrypt, User.crypto_provider
-      User.crypto_provider = "Authlogic::CryptoProviders::BCrypt"
-      assert_equal Authlogic::CryptoProviders::BCrypt, User.crypto_provider
-      User.crypto_provider "Authlogic::CryptoProviders::Sha512"
-      assert_equal Authlogic::CryptoProviders::Sha512, User.crypto_provider
-    end
-
-    def test_transition_from_crypto_providers_config_with_strings
-      assert_equal [Authlogic::CryptoProviders::Sha512], User.transition_from_crypto_providers
-      assert_equal [], Employee.transition_from_crypto_providers
-
-      User.transition_from_crypto_providers = ["Authlogic::CryptoProviders::BCrypt",
-                                               "Authlogic::CryptoProviders::Sha512"]
-      assert_equal [Authlogic::CryptoProviders::BCrypt, Authlogic::CryptoProviders::Sha512],
-        User.transition_from_crypto_providers
-      User.transition_from_crypto_providers []
-      assert_equal [], User.transition_from_crypto_providers
-    end
-
     def test_validates_length_of_password
       u = User.new(login: "abcde", email: "abcde@test.com", password: "abcdefgh", password_confirmation: "abcdefgh")
       assert u.valid?
