@@ -178,10 +178,10 @@ module Authlogic
         # the Authlogic::CryptoProviders module for more info on the available methods and
         # how to create your own.
         #
-        # * <tt>Default:</tt> CryptoProviders::SCrypt ~ SCrypt has a problem on grsec kernels ~ so let's default to BCrypt
+        # * <tt>Default:</tt> CryptoProviders::SCrypt
         # * <tt>Accepts:</tt> Class
         def crypto_provider(value = nil)
-          rw_config(:crypto_provider, value, CryptoProviders::BCrypt)
+          rw_config(:crypto_provider, value, "Authlogic::CryptoProviders::SCrypt")
         end
         alias_method :crypto_provider=, :crypto_provider
 
