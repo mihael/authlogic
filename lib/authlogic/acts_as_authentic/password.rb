@@ -412,11 +412,15 @@ module Authlogic
             end
 
             def crypto_provider
-              self.class.crypto_provider
+              crypto_provider_from_string(self.class.crypto_provider)
             end
 
             def transition_from_crypto_providers
-              self.class.transition_from_crypto_providers
+              crypto_provider_from_string(self.class.transition_from_crypto_providers)
+            end
+
+            def crypto_provider_from_string(value)
+              value.kind_of?(String) ? value.constantize : value
             end
         end
       end
