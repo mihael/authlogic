@@ -209,7 +209,7 @@ module Authlogic
   end
 
   # TODO: Why are these lines inside the `Authlogic` module? Should be outside?
-  ::Test::Unit::TestCase.send(:include, TestCase) if defined?(::Test::Unit::TestCase)
-  ::MiniTest::Unit::TestCase.send(:include, TestCase) if defined?(::MiniTest::Unit::TestCase)
-  ::MiniTest::Test.send(:include, TestCase) if defined?(::MiniTest::Test)
+  ::Test::Unit::TestCase.include(TestCase) if defined?(::Test::Unit::TestCase)
+  ::MiniTest::Unit::TestCase.include(TestCase) if defined?(::MiniTest::Unit::TestCase)
+  ::MiniTest::Test.include(TestCase) if defined?(::MiniTest::Test)
 end

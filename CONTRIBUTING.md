@@ -60,6 +60,10 @@ BUNDLE_GEMFILE=gemfiles/rails_7.2.rb bundle exec rake
 # Rails 8.0
 BUNDLE_GEMFILE=gemfiles/rails_8.0.rb bundle install
 BUNDLE_GEMFILE=gemfiles/rails_8.0.rb bundle exec rake
+
+# Rails 8.1
+BUNDLE_GEMFILE=gemfiles/rails_8.1.rb bundle install
+BUNDLE_GEMFILE=gemfiles/rails_8.1.rb bundle exec rake
 ```
 
 To run a single test:

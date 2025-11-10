@@ -358,7 +358,13 @@ module Authlogic
         For example, rubocop-rails is confused by the deprecated method.
         (https://github.com/rubocop-hq/rubocop-rails/blob/master/lib/rubocop/cop/rails/dynamic_find_by.rb)
       EOS
-      VALID_SAME_SITE_VALUES = [nil, "Lax", "Strict", "None"].freeze
+      # Accept legacy string values and modern symbol values.
+      VALID_SAME_SITE_VALUES = [
+        nil,
+        :lax, :strict, :none,
+        "Lax", "Strict", "None",
+        "lax", "strict", "none"
+      ].freeze
 
       # Callbacks
       # =========
@@ -952,11 +958,16 @@ module Authlogic
         # requests?
         #
         # * <tt>Default:</tt> nil
-        # * <tt>Accepts:</tt> String, one of nil, 'Lax' or 'Strict'
+        # * <tt>Accepts:</tt> Symbol or String, one of nil,
+        #   :lax/:strict/:none (or 'Lax'/'Strict'/'None')
         def same_site(value = nil)
-          unless VALID_SAME_SITE_VALUES.include?(value)
-            msg = "Invalid same_site value: #{value}. Valid: #{VALID_SAME_SITE_VALUES.inspect}"
-            raise ArgumentError, msg
+          unless value.nil?
+            normalized = normalize_same_site_to_string(value)
+            unless VALID_SAME_SITE_VALUES.include?(value) || !normalized.nil?
+              msg = "Invalid same_site value: #{value}. Valid: #{VALID_SAME_SITE_VALUES.inspect}"
+              raise ArgumentError, msg
+            end
+            return rw_config(:same_site, normalized)
           end
           rw_config(:same_site, value)
         end
@@ -1489,13 +1500,14 @@ module Authlogic
         @same_site = self.class.same_site(nil)
       end
 
-      # Accepts nil, 'Lax' or 'Strict' as possible flags.
+      # Accepts nil, :lax/:strict/:none, or the legacy 'Lax'/'Strict'/'None'.
       def same_site=(value)
-        unless VALID_SAME_SITE_VALUES.include?(value)
+        normalized = normalize_same_site_to_string(value)
+        if !value.nil? && normalized.nil?
           msg = "Invalid same_site value: #{value}. Valid: #{VALID_SAME_SITE_VALUES.inspect}"
           raise ArgumentError, msg
         end
-        @same_site = value
+        @same_site = normalized
       end
 
       # If the cookie should be signed
@@ -1806,7 +1818,7 @@ module Authlogic
           expires: remember_me_until,
           secure: secure,
           httponly: httponly,
-          same_site: same_site,
+          same_site: coerce_same_site_for_cookie_jar(same_site, cookie_jar),
           domain: controller.cookie_domain
         }
       end
@@ -1837,6 +1849,43 @@ module Authlogic
 
       def failed_login_ban_for
         self.class.failed_login_ban_for
+      end
+
+      # Normalize same_site to canonical String form: "Lax", "Strict", "None" or nil.
+      def normalize_same_site_to_string(value)
+        return nil if value.nil?
+        v = value.is_a?(String) ? value.downcase : value
+        case v
+        when :lax, "lax" then "Lax"
+        when :strict, "strict" then "Strict"
+        when :none, "none" then "None"
+        end
+      end
+
+      class << self
+        # Class-level normalizer for use in class configuration writers.
+        def normalize_same_site_to_string(value)
+          return nil if value.nil?
+          v = value.is_a?(String) ? value.downcase : value
+          case v
+          when :lax, "lax" then "Lax"
+          when :strict, "strict" then "Strict"
+          when :none, "none" then "None"
+          end
+        end
+      end
+
+      # Coerce same_site to symbol for ActionDispatch cookie jars (Rails 7.1+),
+      # otherwise return the string as-is (for test mocks and non-Rails envs).
+      def coerce_same_site_for_cookie_jar(value, jar)
+        return nil if value.nil?
+        if defined?(ActionDispatch) && jar.class.name.start_with?("ActionDispatch")
+          # Rails expects symbols like :lax/:strict/:none
+          value.downcase.to_sym
+        else
+          # Preserve string form for mocks and other adapters
+          value
+        end
       end
 
       def increase_failed_login_count
